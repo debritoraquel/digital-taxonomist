@@ -1,0 +1,2751 @@
+{
+  "metadata": {
+    "project": "Taxonomista Digital - Hifomicetos Aquáticos",
+    "version": "1.1.0",
+    "date": "2026-03-17",
+    "description": "Grafo de conhecimento taxonômico de fungos ingoldianos (hifomicetos aquáticos) para importação em Neo4j. Integra dados globais de taxonomia, morfologia conidial, ecologia e atributos para classificação por visão computacional.",
+    "sources": [
+      "Ingold 1942 - Trabalho seminal sobre hifomicetos aquáticos",
+      "Webster & Descals 1981 - Morfologia e ecologia de fungos conidiais de água doce",
+      "Fiuza et al. 2017 - Fungos Ingoldianos do Brasil: checklist e chave (Phytotaxa 306)",
+      "Fiuza et al. 2022 - Assembleias de fungos ingoldianos de biomas brasileiros",
+      "Baschien et al. 2013 - Filogenia molecular de hifomicetos aquáticos (Leotiomycetes)",
+      "Belliveau & Bärlocher 2005 - Evidência molecular para origens múltiplas",
+      "Duarte et al. 2016 - Biogeografia de hifomicetos aquáticos",
+      "Gulis et al. 2022 - Barcodes ITS rDNA e diversidade molecular",
+      "Selosse et al. 2008 - Hifomicetos aquáticos como endófitos de plantas",
+      "Luo et al. 2019 - Hifomicetos de água doce do Greater Mekong",
+      "Fiuza et al. 2015 - Primeiros registros de fungos ingoldianos da Amazônia brasileira"
+    ],
+    "neo4j_import_notes": "Use APOC ou Cypher UNWIND para importar. Cada nó possui 'label' e 'properties'. Cada aresta possui 'type', 'start_node_id' e 'end_node_id'.",
+    "changelog": [
+      "v1.1.0: Corrigidos 42 problemas de coerência identificados na auditoria",
+      "- 14 nós órfãos conectados ao grafo",
+      "- 16 gêneros incertae_sedis receberam BELONGS_TO_ORDER tentativa",
+      "- 11 gêneros receberam HAS_MORPHOTYPE",
+      "- 5 espécies receberam distribuição geográfica",
+      "- Atributos morfológicos cor e textura conectados aos morfotipos",
+      "- Basidiomycota, habitats estuarino/marinho e região tropical conectados"
+    ]
+  },
+  "nodes": [
+    {
+      "id": "phylum_ascomycota",
+      "label": "Phylum",
+      "properties": {
+        "name": "Ascomycota",
+        "description": "Filo dominante dos hifomicetos aquáticos. Maioria das espécies ingoldianas pertence a este filo.",
+        "estimated_aquatic_species": ">280"
+      }
+    },
+    {
+      "id": "phylum_basidiomycota",
+      "label": "Phylum",
+      "properties": {
+        "name": "Basidiomycota",
+        "description": "Filo minoritário entre hifomicetos aquáticos, com representantes em Corticiaceae e Urediniomycetes.",
+        "estimated_aquatic_species": "<20"
+      }
+    },
+    {
+      "id": "class_leotiomycetes",
+      "label": "Class",
+      "properties": {
+        "name": "Leotiomycetes",
+        "description": "Classe mais representativa dos hifomicetos aquáticos no Ascomycota. Mais de 75 espécies alocadas.",
+        "key_reference": "Baschien et al. 2013"
+      }
+    },
+    {
+      "id": "class_dothideomycetes",
+      "label": "Class",
+      "properties": {
+        "name": "Dothideomycetes",
+        "description": "Segunda classe mais representada. Inclui espécies de Anguillospora e anamorfos de Massarina.",
+        "key_reference": "Belliveau & Bärlocher 2005"
+      }
+    },
+    {
+      "id": "class_sordariomycetes",
+      "label": "Class",
+      "properties": {
+        "name": "Sordariomycetes",
+        "description": "Classe com aproximadamente 11 espécies de hifomicetos aquáticos alocadas.",
+        "key_reference": "Shearer et al. 2009"
+      }
+    },
+    {
+      "id": "class_orbiliomycetes",
+      "label": "Class",
+      "properties": {
+        "name": "Orbiliomycetes",
+        "description": "Classe menor, com 3-5 espécies de hifomicetos aquáticos, incluindo Anguillospora spp.",
+        "key_reference": "Baschien et al. 2006"
+      }
+    },
+    {
+      "id": "class_eurotiomycetes",
+      "label": "Class",
+      "properties": {
+        "name": "Eurotiomycetes",
+        "description": "Classe com poucos representantes entre fungos de água doce."
+      }
+    },
+    {
+      "id": "class_pezizomycetes",
+      "label": "Class",
+      "properties": {
+        "name": "Pezizomycetes",
+        "description": "Apenas 1 espécie de hifomiceto aquático alocada nesta classe."
+      }
+    },
+    {
+      "id": "order_helotiales",
+      "label": "Order",
+      "properties": {
+        "name": "Helotiales",
+        "description": "Ordem predominante dos hifomicetos aquáticos dentro de Leotiomycetes. Espécies distribuídas em 9 clados suportados.",
+        "key_genera": "Tricladium, Lemonniera, Articulospora, Anguillospora, Varicosporium, Flagellospora"
+      }
+    },
+    {
+      "id": "order_pleosporales",
+      "label": "Order",
+      "properties": {
+        "name": "Pleosporales",
+        "description": "Ordem dentro de Dothideomycetes. Anamorfos de Massarina alocados aqui.",
+        "key_genera": "Tumularia, Amniculicola"
+      }
+    },
+    {
+      "id": "order_hypocreales",
+      "label": "Order",
+      "properties": {
+        "name": "Hypocreales",
+        "description": "Ordem dentro de Sordariomycetes. Nectria lugdunensis (teleomorfo de Heliscus) pertence a esta ordem."
+      }
+    },
+    {
+      "id": "order_xylariales",
+      "label": "Order",
+      "properties": {
+        "name": "Xylariales",
+        "description": "Ordem de Sordariomycetes com poucos representantes aquáticos."
+      }
+    },
+    {
+      "id": "order_capnodiales",
+      "label": "Order",
+      "properties": {
+        "name": "Capnodiales",
+        "description": "Ordem de Dothideomycetes com representantes marinhos e de água doce."
+      }
+    },
+    {
+      "id": "genus_alatospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Alatospora",
+        "authority": "Ingold 1942",
+        "type_species": "Alatospora acuminata",
+        "conidial_shape": "tetraradiate",
+        "description": "Conídios tetrarradiados com braços divergentes. Cosmopolita.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales",
+        "cv_morphotype": "stauroid_branched"
+      }
+    },
+    {
+      "id": "genus_anguillospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Anguillospora",
+        "authority": "(Sacc. & P. Syd.) Ingold 1942",
+        "type_species": "Anguillospora longissima",
+        "conidial_shape": "sigmoid",
+        "description": "Conídios filiformes, curvados a sigmoidais, multiseptados. Gênero polifilético distribuído entre Leotiomycetes, Dothideomycetes e Orbiliomycetes.",
+        "phylogenetic_placement": "Polyphyletic",
+        "cv_morphotype": "scolecoid_sigmoid",
+        "polyphyletic_note": "Oito espécies distribuídas entre 3 classes diferentes (Belliveau & Bärlocher 2005)"
+      }
+    },
+    {
+      "id": "genus_articulospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Articulospora",
+        "authority": "Ingold 1942",
+        "type_species": "Articulospora tetracladia",
+        "conidial_shape": "tetraradiate",
+        "description": "Conídios tetrarradiados articulados. Teleomorfo: Hymenoscyphus tetracladius. Não monofilético.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales",
+        "cv_morphotype": "stauroid_articulated"
+      }
+    },
+    {
+      "id": "genus_campylospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Campylospora",
+        "authority": "Ranzoni 1953",
+        "type_species": "Campylospora chaetocladia",
+        "conidial_shape": "branched_appendaged",
+        "description": "Conídios com apêndices curvados e acessórios característicos. Comum em regiões tropicais e subtropicais.",
+        "phylogenetic_placement": "Sordariomycetes",
+        "cv_morphotype": "branched_appendaged",
+        "species_in_brazil": [
+          "C. brasiliensis",
+          "C. chaetocladia",
+          "C. filicladia",
+          "C. parvula"
+        ]
+      }
+    },
+    {
+      "id": "genus_clavariopsis",
+      "label": "Genus",
+      "properties": {
+        "name": "Clavariopsis",
+        "authority": "De Wild. 1895",
+        "type_species": "Clavariopsis aquatica",
+        "conidial_shape": "clavate_branched",
+        "description": "Conídios clavados a ramificados. Uma das primeiras descrições de hifomicetos aquáticos.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales",
+        "cv_morphotype": "clavate"
+      }
+    },
+    {
+      "id": "genus_clavatospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Clavatospora",
+        "authority": "Sv. Nilsson ex Marvanová & Sv. Nilsson 1971",
+        "type_species": "Clavatospora longibrachiata",
+        "conidial_shape": "clavate_elongated",
+        "description": "Anteriormente Heliscus longibrachiatus. Conídios clavados alongados.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "clavate_elongated"
+      }
+    },
+    {
+      "id": "genus_condylospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Condylospora",
+        "authority": "Nawawi & Kuthub. 1989",
+        "type_species": "Condylospora spumigena",
+        "conidial_shape": "branched_complex",
+        "description": "Conídios ramificados complexos. Registrados no Brasil a partir de espuma.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "branched_complex",
+        "species_in_brazil": [
+          "C. flexuosa",
+          "C. gigantea",
+          "C. spumigena"
+        ]
+      }
+    },
+    {
+      "id": "genus_culicidospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Culicidospora",
+        "authority": "Petersen 1960",
+        "type_species": "Culicidospora aquatica",
+        "conidial_shape": "sigmoid_curved",
+        "description": "Conídios sigmoidais curvados.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "scolecoid_curved"
+      }
+    },
+    {
+      "id": "genus_dendrosporomyces",
+      "label": "Genus",
+      "properties": {
+        "name": "Dendrosporomyces",
+        "authority": "Nawawi, J. Webster & R.A. Davey 1977",
+        "type_species": "Dendrosporomyces prolifer",
+        "conidial_shape": "branched_dendritic",
+        "description": "Conídios holoblásticos ramificados hialinos com eixo principal e ramos primários e secundários.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "dendritic_branched"
+      }
+    },
+    {
+      "id": "genus_dwayaangam",
+      "label": "Genus",
+      "properties": {
+        "name": "Dwayaangam",
+        "authority": "Subram. 1978",
+        "type_species": "Dwayaangam cornuta",
+        "conidial_shape": "branched_cornute",
+        "description": "Conídios ramificados com extensões corniformes.",
+        "phylogenetic_placement": "Orbiliomycetes",
+        "cv_morphotype": "branched_cornute"
+      }
+    },
+    {
+      "id": "genus_filosporella",
+      "label": "Genus",
+      "properties": {
+        "name": "Filosporella",
+        "authority": "Nawawi 1976",
+        "type_species": "Filosporella versimorpha",
+        "conidial_shape": "filiform_variable",
+        "description": "Conídios filiformes de morfologia variável. Gênero não monofilético.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales (polyphyletic)",
+        "cv_morphotype": "filiform_variable"
+      }
+    },
+    {
+      "id": "genus_flabellospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Flabellospora",
+        "authority": "Alas. 1968",
+        "type_species": "Flabellospora multiradiata",
+        "conidial_shape": "multiradiate_flabellate",
+        "description": "Conídios multirradiados em forma de leque. Importante gênero tropical.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "multiradiate_fan",
+        "species_in_brazil": [
+          "F. crassa",
+          "F. multiradiata",
+          "F. verticillata"
+        ]
+      }
+    },
+    {
+      "id": "genus_flagellospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Flagellospora",
+        "authority": "Ingold 1942",
+        "type_species": "Flagellospora curvula",
+        "conidial_shape": "sigmoid_flagellate",
+        "description": "Conídios sigmoidais flagelados. Teleomorfo: Nectria penicillioides. Gênero polifilético.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales (polyphyletic)",
+        "cv_morphotype": "scolecoid_flagellate",
+        "endophyte_capacity": true
+      }
+    },
+    {
+      "id": "genus_geniculospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Geniculospora",
+        "authority": "Sv. Nilsson ex Marvanová & Sv. Nilsson 1971",
+        "type_species": "Geniculospora inflata",
+        "conidial_shape": "sigmoid_geniculate",
+        "description": "Conídios sigmoidais geniculados.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "scolecoid_geniculate"
+      }
+    },
+    {
+      "id": "genus_gyoerffyella",
+      "label": "Genus",
+      "properties": {
+        "name": "Gyoerffyella",
+        "authority": "Kol 1928",
+        "type_species": "Gyoerffyella biappendiculata",
+        "conidial_shape": "appendaged",
+        "description": "Conídios com apêndices. Algumas espécies são biotróficas (G. entomobryoides).",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "appendaged",
+        "ecological_role": "biotrophic_and_saprotrophic"
+      }
+    },
+    {
+      "id": "genus_heliscella",
+      "label": "Genus",
+      "properties": {
+        "name": "Heliscella",
+        "authority": "Marvanová 1980",
+        "type_species": "Heliscella stellata",
+        "conidial_shape": "helicoid_stellate",
+        "description": "Conídios helicoidais estrelados.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "helicoid_stellate"
+      }
+    },
+    {
+      "id": "genus_ingoldiella",
+      "label": "Genus",
+      "properties": {
+        "name": "Ingoldiella",
+        "authority": "D.E. Shaw 1972",
+        "type_species": "Ingoldiella hamata",
+        "conidial_shape": "sigmoid_hooked",
+        "description": "Conídios sigmoidais com ganchos terminais.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "scolecoid_hooked"
+      }
+    },
+    {
+      "id": "genus_jaculispora",
+      "label": "Genus",
+      "properties": {
+        "name": "Jaculispora",
+        "authority": "Hudson & Ingold 1960",
+        "type_species": "Jaculispora submersa",
+        "conidial_shape": "elongate_javelin",
+        "description": "Conídios alongados em forma de dardo.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "elongate_javelin"
+      }
+    },
+    {
+      "id": "genus_lemonniera",
+      "label": "Genus",
+      "properties": {
+        "name": "Lemonniera",
+        "authority": "De Wild. 1894",
+        "type_species": "Lemonniera aquatica",
+        "conidial_shape": "tetraradiate",
+        "description": "Conídios tetrarradiados. Uma das primeiras descrições. Não monofilético, espécies distribuídas entre vários clados.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales (polyphyletic)",
+        "cv_morphotype": "stauroid_tetraradiate",
+        "species_in_brazil": [
+          "L. alabamensis",
+          "L. aquatica",
+          "L. pseudofloscula"
+        ]
+      }
+    },
+    {
+      "id": "genus_lunulospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Lunulospora",
+        "authority": "Ingold 1942",
+        "type_species": "Lunulospora curvula",
+        "conidial_shape": "sigmoid_lunulate",
+        "description": "Conídios sigmoidais em forma de lua crescente. Cosmopolita e abundante.",
+        "phylogenetic_placement": "Dothideomycetes",
+        "cv_morphotype": "scolecoid_lunulate",
+        "species_in_brazil": [
+          "L. curvula",
+          "L. cymbiformis"
+        ]
+      }
+    },
+    {
+      "id": "genus_margaritispora",
+      "label": "Genus",
+      "properties": {
+        "name": "Margaritispora",
+        "authority": "Ingold 1942",
+        "type_species": "Margaritispora aquatica",
+        "conidial_shape": "globose_chain",
+        "description": "Conídios globosos em cadeia.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "globose_catenate"
+      }
+    },
+    {
+      "id": "genus_mycocentrospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Mycocentrospora",
+        "authority": "Deighton 1972",
+        "type_species": "Mycocentrospora acerina",
+        "conidial_shape": "sigmoid_elongated",
+        "description": "Conídios sigmoidais alongados.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "scolecoid_elongated"
+      }
+    },
+    {
+      "id": "genus_naiadella",
+      "label": "Genus",
+      "properties": {
+        "name": "Naiadella",
+        "authority": "Marvanová & Bändoni 1987",
+        "type_species": "Naiadella fluitans",
+        "conidial_shape": "sigmoid_appendaged",
+        "description": "Conídios sigmoidais com apêndices. Micoparasita.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "scolecoid_appendaged",
+        "ecological_role": "mycoparasite"
+      }
+    },
+    {
+      "id": "genus_pyramidospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Pyramidospora",
+        "authority": "Sv. Nilsson 1962",
+        "type_species": "Pyramidospora casuarinae",
+        "conidial_shape": "pyramidal_branched",
+        "description": "Conídios piramidais com células brotando da célula basal e apical. Atualmente 9 espécies.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "pyramidal",
+        "species_in_brazil": [
+          "P. casuarinae",
+          "P. densa",
+          "P. quadricellularis",
+          "P. robusta"
+        ]
+      }
+    },
+    {
+      "id": "genus_scutisporus",
+      "label": "Genus",
+      "properties": {
+        "name": "Scutisporus",
+        "authority": "K. Ando & Tubaki 1984",
+        "type_species": "Scutisporus brunneus",
+        "conidial_shape": "scutellate",
+        "description": "Conídios escutelados.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "scutellate"
+      }
+    },
+    {
+      "id": "genus_tetrachaetum",
+      "label": "Genus",
+      "properties": {
+        "name": "Tetrachaetum",
+        "authority": "Ingold 1942",
+        "type_species": "Tetrachaetum elegans",
+        "conidial_shape": "tetraradiate",
+        "description": "Conídios tetrarradiados elegantes com braços longos. Muito comum em regiões temperadas.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales",
+        "cv_morphotype": "stauroid_tetraradiate_elongated",
+        "endophyte_capacity": false
+      }
+    },
+    {
+      "id": "genus_tetracladium",
+      "label": "Genus",
+      "properties": {
+        "name": "Tetracladium",
+        "authority": "De Wild. 1893",
+        "type_species": "Tetracladium marchalianum",
+        "conidial_shape": "tetraradiate",
+        "description": "Conídios tetrarradiados robustos. Uma das primeiras descrições históricas. Endófito confirmado. Cosmopolita.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales",
+        "cv_morphotype": "stauroid_tetraradiate_robust",
+        "endophyte_capacity": true,
+        "species_known": [
+          "T. marchalianum",
+          "T. setigerum",
+          "T. breve",
+          "T. furcatum",
+          "T. nainitalense",
+          "T. palmatum"
+        ]
+      }
+    },
+    {
+      "id": "genus_tricladium",
+      "label": "Genus",
+      "properties": {
+        "name": "Tricladium",
+        "authority": "Ingold 1942",
+        "type_species": "Tricladium angulatum",
+        "conidial_shape": "triradiate_to_branched",
+        "description": "Conídios tri- a multirradiados. Gênero extenso e não monofilético, distribuído entre vários clados dentro de Helotiales.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales (polyphyletic)",
+        "cv_morphotype": "stauroid_triradiate",
+        "endophyte_capacity": true,
+        "species_in_brazil": [
+          "T. angulatum",
+          "T. attenuatum",
+          "T. chaetocladium",
+          "T. curvisporum",
+          "T. gracile",
+          "T. splendens",
+          "T. fuscum"
+        ]
+      }
+    },
+    {
+      "id": "genus_trinacrium",
+      "label": "Genus",
+      "properties": {
+        "name": "Trinacrium",
+        "authority": "Corda 1837",
+        "type_species": "Trinacrium incurvum",
+        "conidial_shape": "triradiate_incurved",
+        "description": "Conídios trirradiados incurvados.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "stauroid_triradiate_incurved"
+      }
+    },
+    {
+      "id": "genus_triscelophorus",
+      "label": "Genus",
+      "properties": {
+        "name": "Triscelophorus",
+        "authority": "Ingold 1943",
+        "type_species": "Triscelophorus monosporus",
+        "conidial_shape": "triradiate_branched",
+        "description": "Conídios trirradiados ramificados. Diversas espécies tropicais.",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "stauroid_triradiate_branched",
+        "species_in_brazil": [
+          "T. acuminatus",
+          "T. curviramifer",
+          "T. deficiens",
+          "T. magnificus",
+          "T. monosporus"
+        ]
+      }
+    },
+    {
+      "id": "genus_trisulcosporium",
+      "label": "Genus",
+      "properties": {
+        "name": "Trisulcosporium",
+        "authority": "Descals & Webster 1982",
+        "type_species": "Trisulcosporium acerinum",
+        "conidial_shape": "trisulcate",
+        "description": "Conídios com três sulcos.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "trisulcate"
+      }
+    },
+    {
+      "id": "genus_varicosporium",
+      "label": "Genus",
+      "properties": {
+        "name": "Varicosporium",
+        "authority": "Kegel 1906",
+        "type_species": "Varicosporium elodeae",
+        "conidial_shape": "branched_varicose",
+        "description": "Conídios ramificados varicosos. Gênero não monofilético.",
+        "phylogenetic_placement": "Leotiomycetes, Helotiales (polyphyletic)",
+        "cv_morphotype": "branched_varicose"
+      }
+    },
+    {
+      "id": "genus_flabelloscladia",
+      "label": "Genus",
+      "properties": {
+        "name": "Flabelloscladia",
+        "authority": "Nawawi 1985",
+        "type_species": "Flabelloscladia tetracladia",
+        "conidial_shape": "tetraradiate_flabellate",
+        "description": "Conídios tetrarradiados flabelados.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "stauroid_flabellate"
+      }
+    },
+    {
+      "id": "genus_dendrosporium",
+      "label": "Genus",
+      "properties": {
+        "name": "Dendrosporium",
+        "authority": "Plakidas & Edgerton ex J.L. Crane 1972",
+        "type_species": "Dendrosporium lobatum",
+        "conidial_shape": "dendritic_lobate",
+        "description": "Conídios dendríticos lobados.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "dendritic_lobate"
+      }
+    },
+    {
+      "id": "genus_amniculicola",
+      "label": "Genus",
+      "properties": {
+        "name": "Amniculicola",
+        "authority": "Y. Zhang & K.D. Hyde 2008",
+        "type_species": "Amniculicola longissima",
+        "conidial_shape": "sigmoid_filiform",
+        "description": "Anteriormente Anguillospora longissima. Conídios filiformes curvados a sigmoidais, extremamente longos (até 345 μm).",
+        "phylogenetic_placement": "Dothideomycetes, Pleosporales",
+        "cv_morphotype": "scolecoid_filiform_long"
+      }
+    },
+    {
+      "id": "genus_aquanectria",
+      "label": "Genus",
+      "properties": {
+        "name": "Aquanectria",
+        "authority": "L. Lombard & Crous 2015",
+        "type_species": "Aquanectria penicillioides",
+        "conidial_shape": "fusiform_curved",
+        "description": "Conídios fusiformes curvados.",
+        "phylogenetic_placement": "Sordariomycetes, Hypocreales",
+        "cv_morphotype": "fusiform_curved"
+      }
+    },
+    {
+      "id": "genus_diplocladiella",
+      "label": "Genus",
+      "properties": {
+        "name": "Diplocladiella",
+        "authority": "Arnaud ex M.B. Ellis 1976",
+        "type_species": "Diplocladiella scalaroides",
+        "conidial_shape": "branched_scalaroid",
+        "description": "Conídios ramificados escalaroides.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "branched_scalaroid"
+      }
+    },
+    {
+      "id": "genus_mycofalcella",
+      "label": "Genus",
+      "properties": {
+        "name": "Mycofalcella",
+        "authority": "Marvanová, Om-Kalthoum & Webster 1993",
+        "type_species": "Mycofalcella calcarata",
+        "conidial_shape": "falcate",
+        "description": "Conídios falcados (forma de foice).",
+        "phylogenetic_placement": "Leotiomycetes",
+        "cv_morphotype": "scolecoid_falcate"
+      }
+    },
+    {
+      "id": "genus_brachiosphaera",
+      "label": "Genus",
+      "properties": {
+        "name": "Brachiosphaera",
+        "authority": "Nawawi 1976",
+        "type_species": "Brachiosphaera tropicalis",
+        "conidial_shape": "spherical_branched",
+        "description": "Conídios esféricos com ramificações. Gênero tropical.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "spherical_branched"
+      }
+    },
+    {
+      "id": "genus_volucrispora",
+      "label": "Genus",
+      "properties": {
+        "name": "Volucrispora",
+        "authority": "Haskins 1958",
+        "type_species": "Volucrispora aurantiaca",
+        "conidial_shape": "multiradiate",
+        "description": "Conídios multirradiados com braços divergentes para flutuação.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "multiradiate_divergent"
+      }
+    },
+    {
+      "id": "genus_actinospora",
+      "label": "Genus",
+      "properties": {
+        "name": "Actinospora",
+        "authority": "Ingold 1952",
+        "type_species": "Actinospora megalospora",
+        "conidial_shape": "multiradiate_stellate",
+        "description": "Conídios multirradiados estrelados grandes.",
+        "phylogenetic_placement": "Incertae sedis",
+        "cv_morphotype": "multiradiate_stellate"
+      }
+    },
+    {
+      "id": "species_alatospora_acuminata",
+      "label": "Species",
+      "properties": {
+        "name": "Alatospora acuminata",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas e espuma",
+        "morphology_summary": "Conídios tetrarradiados acuminados"
+      }
+    },
+    {
+      "id": "species_anguillospora_crassa",
+      "label": "Species",
+      "properties": {
+        "name": "Anguillospora crassa",
+        "authority": "Ingold 1958",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Mata Atlântica"
+        ],
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios filiformes sigmoidais espessos, multiseptados",
+        "note": "Sequência nSSU rDNA idêntica a A. furtiva"
+      }
+    },
+    {
+      "id": "species_anguillospora_longissima",
+      "label": "Species",
+      "properties": {
+        "name": "Anguillospora longissima",
+        "authority": "(Sacc. & P. Syd.) Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga"
+        ],
+        "substrate": "Folhas submersas e espuma",
+        "morphology_summary": "Conídios filiformes, curvados a sigmoidais, 7-20 septados, 112.5-345 × 3-5 μm",
+        "current_name": "Amniculicola longissima"
+      }
+    },
+    {
+      "id": "species_articulospora_tetracladia",
+      "label": "Species",
+      "properties": {
+        "name": "Articulospora tetracladia",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios tetrarradiados articulados",
+        "teleomorph": "Hymenoscyphus tetracladius"
+      }
+    },
+    {
+      "id": "species_campylospora_chaetocladia",
+      "label": "Species",
+      "properties": {
+        "name": "Campylospora chaetocladia",
+        "authority": "Ranzoni 1953",
+        "distribution": "Pantropical",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios com apêndices curvados e chetocládios"
+      }
+    },
+    {
+      "id": "species_clavariopsis_aquatica",
+      "label": "Species",
+      "properties": {
+        "name": "Clavariopsis aquatica",
+        "authority": "De Wild. 1895",
+        "distribution": "Cosmopolita",
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios clavados a ramificados"
+      }
+    },
+    {
+      "id": "species_flagellospora_curvula",
+      "label": "Species",
+      "properties": {
+        "name": "Flagellospora curvula",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas e espuma",
+        "morphology_summary": "Conídios sigmoidais curvados flagelados"
+      }
+    },
+    {
+      "id": "species_lemonniera_aquatica",
+      "label": "Species",
+      "properties": {
+        "name": "Lemonniera aquatica",
+        "authority": "De Wild. 1894",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga"
+        ],
+        "substrate": "Folhas submersas e espuma",
+        "morphology_summary": "Conídios tetrarradiados com braços longos e delicados"
+      }
+    },
+    {
+      "id": "species_lunulospora_curvula",
+      "label": "Species",
+      "properties": {
+        "name": "Lunulospora curvula",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas e espuma",
+        "morphology_summary": "Conídios sigmoidais lunulados (lua crescente)"
+      }
+    },
+    {
+      "id": "species_tetracladium_marchalianum",
+      "label": "Species",
+      "properties": {
+        "name": "Tetracladium marchalianum",
+        "authority": "De Wild. 1893",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Mata Atlântica",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios tetrarradiados robustos"
+      }
+    },
+    {
+      "id": "species_tetrachaetum_elegans",
+      "label": "Species",
+      "properties": {
+        "name": "Tetrachaetum elegans",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita (predominante em temperados)",
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios tetrarradiados elegantes com braços finos e longos"
+      }
+    },
+    {
+      "id": "species_tricladium_angulatum",
+      "label": "Species",
+      "properties": {
+        "name": "Tricladium angulatum",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Mata Atlântica",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios trirradiados angulados"
+      }
+    },
+    {
+      "id": "species_tricladium_splendens",
+      "label": "Species",
+      "properties": {
+        "name": "Tricladium splendens",
+        "authority": "Ingold 1942",
+        "distribution": "Cosmopolita",
+        "brazil_biomes": [
+          "Mata Atlântica"
+        ],
+        "substrate": "Folhas submersas",
+        "morphology_summary": "Conídios trirradiados esplêndidos"
+      }
+    },
+    {
+      "id": "species_triscelophorus_monosporus",
+      "label": "Species",
+      "properties": {
+        "name": "Triscelophorus monosporus",
+        "authority": "Ingold 1943",
+        "distribution": "Pantropical a cosmopolita",
+        "brazil_biomes": [
+          "Amazônia",
+          "Mata Atlântica",
+          "Caatinga",
+          "Cerrado"
+        ],
+        "substrate": "Folhas submersas e espuma",
+        "morphology_summary": "Conídios trirradiados ramificados monosporos"
+      }
+    },
+    {
+      "id": "species_varicosporium_elodeae",
+      "label": "Species",
+      "properties": {
+        "name": "Varicosporium elodeae",
+        "authority": "Kegel 1906",
+        "distribution": "Cosmopolita",
+        "substrate": "Folhas submersas e matéria orgânica submersa",
+        "morphology_summary": "Conídios ramificados varicosos"
+      }
+    },
+    {
+      "id": "morphotype_stauroid",
+      "label": "ConidialMorphotype",
+      "properties": {
+        "name": "Estauróide (Stauroid)",
+        "description": "Conídios ramificados, frequentemente tetrarradiados ou multirradiados. Formato adaptado para fixação em substratos em água corrente.",
+        "key_genera": [
+          "Alatospora",
+          "Articulospora",
+          "Lemonniera",
+          "Tetracladium",
+          "Tetrachaetum",
+          "Tricladium",
+          "Triscelophorus"
+        ],
+        "cv_feature_class": "branched_radiate",
+        "typical_size_range_um": ">50"
+      }
+    },
+    {
+      "id": "morphotype_scolecoid",
+      "label": "ConidialMorphotype",
+      "properties": {
+        "name": "Escolecoide (Scolecoid)",
+        "description": "Conídios sigmoidais, vermiformes, geralmente curvados em mais de um plano.",
+        "key_genera": [
+          "Anguillospora",
+          "Flagellospora",
+          "Lunulospora",
+          "Culicidospora",
+          "Geniculospora"
+        ],
+        "cv_feature_class": "sigmoid_vermiform",
+        "typical_size_range_um": "50-350"
+      }
+    },
+    {
+      "id": "morphotype_appendaged",
+      "label": "ConidialMorphotype",
+      "properties": {
+        "name": "Apendiculado (Appendaged)",
+        "description": "Conídios com apêndices mucilaginosos ou filamentosos para flutuação e adesão.",
+        "key_genera": [
+          "Campylospora",
+          "Gyoerffyella",
+          "Naiadella"
+        ],
+        "cv_feature_class": "appendaged",
+        "typical_size_range_um": "20-100"
+      }
+    },
+    {
+      "id": "morphotype_helicoid",
+      "label": "ConidialMorphotype",
+      "properties": {
+        "name": "Helicoide (Helicoid)",
+        "description": "Conídios enrolados em espiral ou hélice.",
+        "key_genera": [
+          "Heliscella"
+        ],
+        "cv_feature_class": "helicoid_spiral",
+        "typical_size_range_um": "30-80"
+      }
+    },
+    {
+      "id": "morphotype_clavate",
+      "label": "ConidialMorphotype",
+      "properties": {
+        "name": "Clavado (Clavate)",
+        "description": "Conídios em forma de clava, alargados na extremidade.",
+        "key_genera": [
+          "Clavariopsis",
+          "Clavatospora"
+        ],
+        "cv_feature_class": "clavate",
+        "typical_size_range_um": "30-100"
+      }
+    },
+    {
+      "id": "morph_attr_septation",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Septação (Septation)",
+        "description": "Número e posicionamento de septos nos conídios",
+        "measurement_type": "count_and_position",
+        "cv_relevance": "HIGH - Critério fundamental de identificação",
+        "cv_detection_method": "Edge detection + contour analysis"
+      }
+    },
+    {
+      "id": "morph_attr_branching_pattern",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Padrão de Ramificação (Branching Pattern)",
+        "description": "Número, ângulo e disposição dos braços do conídio",
+        "measurement_type": "structural_topology",
+        "cv_relevance": "HIGH - Discriminante entre gêneros",
+        "cv_detection_method": "Skeleton extraction + graph topology"
+      }
+    },
+    {
+      "id": "morph_attr_conidial_length",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Comprimento do Conídio (Conidial Length)",
+        "description": "Dimensão longitudinal do conídio em micrômetros",
+        "measurement_type": "continuous_um",
+        "cv_relevance": "MEDIUM - Varia intra-específicamente",
+        "cv_detection_method": "Scale bar calibration + bounding box"
+      }
+    },
+    {
+      "id": "morph_attr_conidial_width",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Largura do Conídio (Conidial Width)",
+        "description": "Dimensão transversal do conídio em micrômetros",
+        "measurement_type": "continuous_um",
+        "cv_relevance": "MEDIUM",
+        "cv_detection_method": "Scale bar calibration + cross-section measurement"
+      }
+    },
+    {
+      "id": "morph_attr_curvature",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Curvatura (Curvature)",
+        "description": "Grau e padrão de curvatura do conídio (reto, curvado, sigmoidal, helicoidal)",
+        "measurement_type": "categorical_gradient",
+        "cv_relevance": "HIGH - Discriminante entre morfotipos",
+        "cv_detection_method": "Curve fitting + curvature analysis"
+      }
+    },
+    {
+      "id": "morph_attr_color",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Coloração (Pigmentation)",
+        "description": "Cor do conídio: hialino, pigmentado claro, marrom, marrom escuro",
+        "measurement_type": "categorical",
+        "cv_relevance": "MEDIUM - Distingue dematiáceos",
+        "cv_detection_method": "Color histogram analysis"
+      }
+    },
+    {
+      "id": "morph_attr_surface_texture",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Textura da Superfície (Surface Texture)",
+        "description": "Liso, verrucoso, ornamentado",
+        "measurement_type": "categorical",
+        "cv_relevance": "LOW-MEDIUM - Requer alta resolução",
+        "cv_detection_method": "Texture analysis (GLCM, LBP)"
+      }
+    },
+    {
+      "id": "morph_attr_constriction",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Constrição nos Septos (Septal Constriction)",
+        "description": "Presença e grau de estreitamento nos pontos de septação",
+        "measurement_type": "boolean_gradient",
+        "cv_relevance": "HIGH - Critério taxonômico importante",
+        "cv_detection_method": "Width profiling along axis"
+      }
+    },
+    {
+      "id": "morph_attr_arm_count",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Número de Braços (Arm Count)",
+        "description": "Quantidade de braços/ramificações do conídio estauróide",
+        "measurement_type": "discrete_count",
+        "cv_relevance": "CRITICAL - Define morfotipo",
+        "cv_detection_method": "Skeleton endpoint detection"
+      }
+    },
+    {
+      "id": "morph_attr_arm_angle",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Ângulo entre Braços (Arm Angle)",
+        "description": "Ângulo de divergência entre os braços do conídio",
+        "measurement_type": "continuous_degrees",
+        "cv_relevance": "HIGH - Discriminante entre gêneros",
+        "cv_detection_method": "Skeleton junction angle measurement"
+      }
+    },
+    {
+      "id": "morph_attr_mucilage",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Bainha Mucilaginosa (Mucilaginous Sheath)",
+        "description": "Presença de envoltório mucilaginoso para adesão ao substrato",
+        "measurement_type": "boolean_extent",
+        "cv_relevance": "MEDIUM",
+        "cv_detection_method": "Phase contrast + halo detection"
+      }
+    },
+    {
+      "id": "morph_attr_tip_morphology",
+      "label": "MorphologicalAttribute",
+      "properties": {
+        "name": "Morfologia das Pontas (Tip Morphology)",
+        "description": "Forma das extremidades: arredondada, acuminada, espinhosa, com almofada adesiva",
+        "measurement_type": "categorical",
+        "cv_relevance": "HIGH - Importante para identificação",
+        "cv_detection_method": "Endpoint shape descriptor"
+      }
+    },
+    {
+      "id": "conidiogenesis_holoblastic",
+      "label": "Conidiogenesis",
+      "properties": {
+        "name": "Holoblástica",
+        "description": "Conídio formado por expansão de toda a parede celular da célula conidiogênica."
+      }
+    },
+    {
+      "id": "conidiogenesis_phialidic",
+      "label": "Conidiogenesis",
+      "properties": {
+        "name": "Fialídica",
+        "description": "Conídio formado através de uma abertura apical fixa (fiálide)."
+      }
+    },
+    {
+      "id": "conidiogenesis_sympodial",
+      "label": "Conidiogenesis",
+      "properties": {
+        "name": "Simpodial",
+        "description": "Conídio formado por crescimento lateral simpodial da célula conidiogênica."
+      }
+    },
+    {
+      "id": "conidiogenesis_annellidic",
+      "label": "Conidiogenesis",
+      "properties": {
+        "name": "Anelídica",
+        "description": "Conídio formado por extensões anelídicas."
+      }
+    },
+    {
+      "id": "eco_group_ingoldian",
+      "label": "EcologicalGroup",
+      "properties": {
+        "name": "Ingoldiano (Ingoldian)",
+        "description": "Esporulam submersos. Conídios estauróides ou escolecoide adaptados à dispersão em água corrente.",
+        "habitat_preference": "Águas correntes bem aeradas",
+        "key_function": "Decomposição de matéria orgânica alóctone"
+      }
+    },
+    {
+      "id": "eco_group_aeroaquatic",
+      "label": "EcologicalGroup",
+      "properties": {
+        "name": "Aero-aquático (Aero-aquatic)",
+        "description": "Esporulam apenas após exposição ao ar. Conídios com dispositivos de flutuação. Habitat preferencial lêntico.",
+        "habitat_preference": "Águas paradas ou lênticas"
+      }
+    },
+    {
+      "id": "eco_group_terrestrial_aquatic",
+      "label": "EcologicalGroup",
+      "properties": {
+        "name": "Terrestre-aquático (Terrestrial-aquatic)",
+        "description": "Produzem conídios estauróides de origem endofítica em gotas de orvalho, neblina e chuva sobre folhas vivas.",
+        "habitat_preference": "Superfícies foliares terrestres"
+      }
+    },
+    {
+      "id": "eco_group_submerged_aquatic",
+      "label": "EcologicalGroup",
+      "properties": {
+        "name": "Submerso-aquático (Submerged-aquatic)",
+        "description": "Crescem em madeira submersa em decomposição.",
+        "habitat_preference": "Madeira submersa em habitats lóticos"
+      }
+    },
+    {
+      "id": "habitat_lotic",
+      "label": "Habitat",
+      "properties": {
+        "name": "Lótico (Lotic)",
+        "description": "Águas correntes: rios, riachos, córregos",
+        "typical_conditions": "Água bem aerada, fluxo contínuo, substrato foliar abundante"
+      }
+    },
+    {
+      "id": "habitat_lentic",
+      "label": "Habitat",
+      "properties": {
+        "name": "Lêntico (Lentic)",
+        "description": "Águas paradas: lagos, lagoas, pântanos, brejais"
+      }
+    },
+    {
+      "id": "habitat_estuarine",
+      "label": "Habitat",
+      "properties": {
+        "name": "Estuarino (Estuarine)",
+        "description": "Zonas de transição água doce-salgada"
+      }
+    },
+    {
+      "id": "habitat_marine",
+      "label": "Habitat",
+      "properties": {
+        "name": "Marinho (Marine)",
+        "description": "Ambientes marinhos, principalmente intertidais de mangue"
+      }
+    },
+    {
+      "id": "substrate_leaf_litter",
+      "label": "Substrate",
+      "properties": {
+        "name": "Serrapilheira Foliar Submersa",
+        "description": "Folhas em decomposição submersas em riachos. Substrato principal dos fungos ingoldianos.",
+        "collection_method": "Coleta direta de folhas submersas ou armadilhas de serrapilheira"
+      }
+    },
+    {
+      "id": "substrate_foam",
+      "label": "Substrate",
+      "properties": {
+        "name": "Espuma de Riachos",
+        "description": "Espuma natural formada em corredeiras e cachoeiras. Concentra conídios.",
+        "collection_method": "Coleta de espuma com recipientes estéreis"
+      }
+    },
+    {
+      "id": "substrate_wood",
+      "label": "Substrate",
+      "properties": {
+        "name": "Madeira Submersa",
+        "description": "Galhos e troncos submersos em decomposição.",
+        "collection_method": "Coleta direta e incubação em câmara úmida"
+      }
+    },
+    {
+      "id": "substrate_roots",
+      "label": "Substrate",
+      "properties": {
+        "name": "Raízes Ripárias",
+        "description": "Raízes de plantas ripárias, onde podem atuar como endófitos.",
+        "collection_method": "Isolamento de raízes esterilizadas superficialmente"
+      }
+    },
+    {
+      "id": "region_brazil_amazon",
+      "label": "GeographicRegion",
+      "properties": {
+        "name": "Amazônia Brasileira",
+        "climate": "Tropical",
+        "species_richness": "19 táxons ingoldianos registrados (Fiuza et al. 2017)",
+        "key_references": "Fiuza et al. 2015, 2017"
+      }
+    },
+    {
+      "id": "region_brazil_atlantic_forest",
+      "label": "GeographicRegion",
+      "properties": {
+        "name": "Mata Atlântica",
+        "climate": "Tropical a subtropical",
+        "species_richness": "53 táxons ingoldianos registrados - maior diversidade no Brasil",
+        "key_references": "Schoenlein-Crusius & Milanez, Fiuza et al. 2017"
+      }
+    },
+    {
+      "id": "region_brazil_caatinga",
+      "label": "GeographicRegion",
+      "properties": {
+        "name": "Caatinga",
+        "climate": "Semiárido",
+        "species_richness": "39 táxons ingoldianos registrados",
+        "key_references": "Fiuza & Gusmão 2013, Fiuza et al. 2017"
+      }
+    },
+    {
+      "id": "region_brazil_cerrado",
+      "label": "GeographicRegion",
+      "properties": {
+        "name": "Cerrado",
+        "climate": "Tropical sazonal",
+        "species_richness": "21 táxons ingoldianos registrados",
+        "key_references": "Fiuza et al. 2017"
+      }
+    },
+    {
+      "id": "region_temperate",
+      "label": "GeographicRegion",
+      "properties": {
+        "name": "Regiões Temperadas (Global)",
+        "climate": "Temperado",
+        "species_richness": "Maior diversidade global registrada",
+        "description": "Europa, América do Norte temperada, Australásia"
+      }
+    },
+    {
+      "id": "region_tropical",
+      "label": "GeographicRegion",
+      "properties": {
+        "name": "Regiões Tropicais (Global)",
+        "climate": "Tropical",
+        "description": "Micobiota ingoldiana característica distinta das temperadas"
+      }
+    },
+    {
+      "id": "enzyme_cellulase",
+      "label": "EnzymaticActivity",
+      "properties": {
+        "name": "Celulase",
+        "description": "Degrada celulose da parede celular vegetal",
+        "ecological_function": "Decomposição de tecido foliar"
+      }
+    },
+    {
+      "id": "enzyme_pectinase",
+      "label": "EnzymaticActivity",
+      "properties": {
+        "name": "Pectinase",
+        "description": "Degrada pectina, componente da lamela média",
+        "ecological_function": "Maceração foliar"
+      }
+    },
+    {
+      "id": "enzyme_xylanase",
+      "label": "EnzymaticActivity",
+      "properties": {
+        "name": "Xilanase",
+        "description": "Degrada xilanas (hemicelulose)",
+        "ecological_function": "Decomposição de hemicelulose"
+      }
+    },
+    {
+      "id": "enzyme_laccase",
+      "label": "EnzymaticActivity",
+      "properties": {
+        "name": "Lacase",
+        "description": "Oxidase envolvida na degradação de lignina",
+        "ecological_function": "Decomposição de lignina"
+      }
+    },
+    {
+      "id": "enzyme_nitrate_reductase",
+      "label": "EnzymaticActivity",
+      "properties": {
+        "name": "Nitrato Redutase",
+        "description": "Enzima chave no ciclo do nitrogênio. Gene euknr utilizado como marcador funcional.",
+        "ecological_function": "Assimilação de nitrogênio da água para a serrapilheira",
+        "key_reference": "Aquatic Hyphomycete Taxonomic Relatedness and Nitrate Reductase Gene (PMC 2021)"
+      }
+    },
+    {
+      "id": "cv_arch_siamese_vit",
+      "label": "CVArchitecture",
+      "properties": {
+        "name": "Siamese Vision Transformer (ViT-Small)",
+        "description": "Rede Siamesa com backbone ViT-Small para few-shot learning. Adequada para datasets pequenos (~4600 imagens). Aprende similaridade entre pares de imagens.",
+        "backbone": "ViT-Small",
+        "approach": "Few-shot learning",
+        "training_paradigm": "Contrastive/triplet loss",
+        "advantage": "Funciona com poucos exemplos por classe",
+        "challenge": "Desbalanceamento de classes entre táxons raros e comuns"
+      }
+    },
+    {
+      "id": "cv_arch_multimodal_vlm",
+      "label": "CVArchitecture",
+      "properties": {
+        "name": "Vision-Language Model (LLaVA-Med / BiomedGPT)",
+        "description": "Modelo multimodal integrando visão e linguagem para descrição taxonômica automatizada. Integrado via LangChain com Neo4j.",
+        "integration": "LangChain + Neo4j",
+        "advantage": "Pode gerar descrições taxonômicas textuais a partir de imagens",
+        "challenge": "Requer fine-tuning para domínio micológico específico"
+      }
+    },
+    {
+      "id": "cv_pipeline_preprocessing",
+      "label": "CVPipeline",
+      "properties": {
+        "name": "Pipeline de Pré-processamento (v3)",
+        "description": "Pipeline baseada em percentil para isolamento de espécimes individuais a partir de imagens TIFF de microscopia. Substitui abordagem adaptativa de limiarização (v1-v2).",
+        "input": "Imagens TIFF de microscopia",
+        "output": "Espécimes individuais isolados para treinamento ML",
+        "stack": "Python + PyTorch"
+      }
+    }
+  ],
+  "relationships": [
+    {
+      "type": "BELONGS_TO_PHYLUM",
+      "start_node_id": "class_leotiomycetes",
+      "end_node_id": "phylum_ascomycota"
+    },
+    {
+      "type": "BELONGS_TO_PHYLUM",
+      "start_node_id": "class_dothideomycetes",
+      "end_node_id": "phylum_ascomycota"
+    },
+    {
+      "type": "BELONGS_TO_PHYLUM",
+      "start_node_id": "class_sordariomycetes",
+      "end_node_id": "phylum_ascomycota"
+    },
+    {
+      "type": "BELONGS_TO_PHYLUM",
+      "start_node_id": "class_orbiliomycetes",
+      "end_node_id": "phylum_ascomycota"
+    },
+    {
+      "type": "BELONGS_TO_PHYLUM",
+      "start_node_id": "class_eurotiomycetes",
+      "end_node_id": "phylum_ascomycota"
+    },
+    {
+      "type": "BELONGS_TO_PHYLUM",
+      "start_node_id": "class_pezizomycetes",
+      "end_node_id": "phylum_ascomycota"
+    },
+    {
+      "type": "BELONGS_TO_CLASS",
+      "start_node_id": "order_helotiales",
+      "end_node_id": "class_leotiomycetes"
+    },
+    {
+      "type": "BELONGS_TO_CLASS",
+      "start_node_id": "order_pleosporales",
+      "end_node_id": "class_dothideomycetes"
+    },
+    {
+      "type": "BELONGS_TO_CLASS",
+      "start_node_id": "order_capnodiales",
+      "end_node_id": "class_dothideomycetes"
+    },
+    {
+      "type": "BELONGS_TO_CLASS",
+      "start_node_id": "order_hypocreales",
+      "end_node_id": "class_sordariomycetes"
+    },
+    {
+      "type": "BELONGS_TO_CLASS",
+      "start_node_id": "order_xylariales",
+      "end_node_id": "class_sordariomycetes"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_alatospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_articulospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_clavariopsis",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_clavatospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_culicidospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_filosporella",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_flagellospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_geniculospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_gyoerffyella",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_heliscella",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_lemonniera",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_margaritispora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_mycocentrospora",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_mycofalcella",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_tetrachaetum",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_tetracladium",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_tricladium",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_triscelophorus",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_varicosporium",
+      "end_node_id": "order_helotiales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_lunulospora",
+      "end_node_id": "order_pleosporales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_amniculicola",
+      "end_node_id": "order_pleosporales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_aquanectria",
+      "end_node_id": "order_hypocreales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_campylospora",
+      "end_node_id": "order_hypocreales"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_dwayaangam",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "note": "Alocação em Orbiliomycetes também reportada"
+      }
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_alatospora_acuminata",
+      "end_node_id": "genus_alatospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_anguillospora_crassa",
+      "end_node_id": "genus_anguillospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_anguillospora_longissima",
+      "end_node_id": "genus_anguillospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_articulospora_tetracladia",
+      "end_node_id": "genus_articulospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_campylospora_chaetocladia",
+      "end_node_id": "genus_campylospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_clavariopsis_aquatica",
+      "end_node_id": "genus_clavariopsis"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_flagellospora_curvula",
+      "end_node_id": "genus_flagellospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_lemonniera_aquatica",
+      "end_node_id": "genus_lemonniera"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_lunulospora_curvula",
+      "end_node_id": "genus_lunulospora"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_tetracladium_marchalianum",
+      "end_node_id": "genus_tetracladium"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_tetrachaetum_elegans",
+      "end_node_id": "genus_tetrachaetum"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_tricladium_angulatum",
+      "end_node_id": "genus_tricladium"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_tricladium_splendens",
+      "end_node_id": "genus_tricladium"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_triscelophorus_monosporus",
+      "end_node_id": "genus_triscelophorus"
+    },
+    {
+      "type": "BELONGS_TO_GENUS",
+      "start_node_id": "species_varicosporium_elodeae",
+      "end_node_id": "genus_varicosporium"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_alatospora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_articulospora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_lemonniera",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_tetracladium",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_tetrachaetum",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_tricladium",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_triscelophorus",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_trinacrium",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_flabellospora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_actinospora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_volucrispora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_flabelloscladia",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_varicosporium",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_pyramidospora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_brachiosphaera",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_anguillospora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_flagellospora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_lunulospora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_culicidospora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_geniculospora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_mycocentrospora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_amniculicola",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_ingoldiella",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_mycofalcella",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_campylospora",
+      "end_node_id": "morphotype_appendaged"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_gyoerffyella",
+      "end_node_id": "morphotype_appendaged"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_naiadella",
+      "end_node_id": "morphotype_appendaged"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_heliscella",
+      "end_node_id": "morphotype_helicoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_clavariopsis",
+      "end_node_id": "morphotype_clavate"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_clavatospora",
+      "end_node_id": "morphotype_clavate"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_alatospora",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_anguillospora",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_articulospora",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_campylospora",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_clavariopsis",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_flagellospora",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_lemonniera",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_lunulospora",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_tetracladium",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_tetrachaetum",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_tricladium",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_triscelophorus",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "CLASSIFIED_AS",
+      "start_node_id": "genus_varicosporium",
+      "end_node_id": "eco_group_ingoldian"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_alatospora_acuminata",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_alatospora_acuminata",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_alatospora_acuminata",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_alatospora_acuminata",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_alatospora_acuminata",
+      "end_node_id": "region_temperate"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_anguillospora_longissima",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_anguillospora_longissima",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_anguillospora_longissima",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_articulospora_tetracladia",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_articulospora_tetracladia",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_articulospora_tetracladia",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_articulospora_tetracladia",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_campylospora_chaetocladia",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_campylospora_chaetocladia",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_campylospora_chaetocladia",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_campylospora_chaetocladia",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_flagellospora_curvula",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_flagellospora_curvula",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_flagellospora_curvula",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_flagellospora_curvula",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lunulospora_curvula",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lunulospora_curvula",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lunulospora_curvula",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lunulospora_curvula",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_triscelophorus_monosporus",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_triscelophorus_monosporus",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_triscelophorus_monosporus",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_triscelophorus_monosporus",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lemonniera_aquatica",
+      "end_node_id": "region_brazil_amazon"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lemonniera_aquatica",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_lemonniera_aquatica",
+      "end_node_id": "region_brazil_caatinga"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tricladium_angulatum",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tricladium_angulatum",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tetracladium_marchalianum",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tetracladium_marchalianum",
+      "end_node_id": "region_brazil_cerrado"
+    },
+    {
+      "type": "FOUND_ON",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "substrate_leaf_litter"
+    },
+    {
+      "type": "FOUND_ON",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "substrate_foam"
+    },
+    {
+      "type": "FOUND_ON",
+      "start_node_id": "eco_group_submerged_aquatic",
+      "end_node_id": "substrate_wood"
+    },
+    {
+      "type": "FOUND_ON",
+      "start_node_id": "eco_group_terrestrial_aquatic",
+      "end_node_id": "substrate_roots"
+    },
+    {
+      "type": "INHABITS",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "habitat_lotic"
+    },
+    {
+      "type": "INHABITS",
+      "start_node_id": "eco_group_aeroaquatic",
+      "end_node_id": "habitat_lentic"
+    },
+    {
+      "type": "INHABITS",
+      "start_node_id": "eco_group_submerged_aquatic",
+      "end_node_id": "habitat_lotic"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_arm_count"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_arm_angle"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_branching_pattern"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_septation"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_conidial_length"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_conidial_width"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_tip_morphology"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_curvature"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_septation"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_conidial_length"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_conidial_width"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_constriction"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_appendaged",
+      "end_node_id": "morph_attr_mucilage"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_appendaged",
+      "end_node_id": "morph_attr_tip_morphology"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_alatospora",
+      "end_node_id": "conidiogenesis_holoblastic"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_flagellospora",
+      "end_node_id": "conidiogenesis_phialidic"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_tetracladium",
+      "end_node_id": "conidiogenesis_holoblastic"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_tricladium",
+      "end_node_id": "conidiogenesis_holoblastic"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_varicosporium",
+      "end_node_id": "conidiogenesis_sympodial"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_articulospora",
+      "end_node_id": "conidiogenesis_holoblastic"
+    },
+    {
+      "type": "PRODUCES_ENZYME",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "enzyme_cellulase"
+    },
+    {
+      "type": "PRODUCES_ENZYME",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "enzyme_pectinase"
+    },
+    {
+      "type": "PRODUCES_ENZYME",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "enzyme_xylanase"
+    },
+    {
+      "type": "PRODUCES_ENZYME",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "enzyme_laccase"
+    },
+    {
+      "type": "PRODUCES_ENZYME",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "enzyme_nitrate_reductase"
+    },
+    {
+      "type": "TARGETS_CLASSIFICATION_OF",
+      "start_node_id": "cv_arch_siamese_vit",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "TARGETS_CLASSIFICATION_OF",
+      "start_node_id": "cv_arch_siamese_vit",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "TARGETS_CLASSIFICATION_OF",
+      "start_node_id": "cv_arch_siamese_vit",
+      "end_node_id": "morphotype_appendaged"
+    },
+    {
+      "type": "INTEGRATES_WITH",
+      "start_node_id": "cv_arch_multimodal_vlm",
+      "end_node_id": "cv_arch_siamese_vit",
+      "properties": {
+        "integration_type": "LangChain pipeline: VLM descreve -> Neo4j valida -> Siamese classifica"
+      }
+    },
+    {
+      "type": "FEEDS_INTO",
+      "start_node_id": "cv_pipeline_preprocessing",
+      "end_node_id": "cv_arch_siamese_vit",
+      "properties": {
+        "data_flow": "Imagens TIFF segmentadas -> espécimes isolados -> treinamento few-shot"
+      }
+    },
+    {
+      "type": "QUERIES_GRAPH",
+      "start_node_id": "cv_arch_multimodal_vlm",
+      "end_node_id": "genus_alatospora",
+      "properties": {
+        "query_type": "Validação taxonômica via traversal do grafo"
+      }
+    },
+    {
+      "type": "TELEOMORPH_OF",
+      "start_node_id": "species_articulospora_tetracladia",
+      "end_node_id": "species_articulospora_tetracladia",
+      "properties": {
+        "teleomorph_name": "Hymenoscyphus tetracladius",
+        "family": "Helotiaceae"
+      }
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_anguillospora",
+      "end_node_id": "class_leotiomycetes",
+      "properties": {
+        "evidence": "nSSU rDNA (Belliveau & Bärlocher 2005)"
+      }
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_anguillospora",
+      "end_node_id": "class_dothideomycetes"
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_anguillospora",
+      "end_node_id": "class_orbiliomycetes"
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_tricladium",
+      "end_node_id": "class_leotiomycetes",
+      "properties": {
+        "evidence": "Espécies distribuídas entre múltiplos clados dentro de Helotiales (Baschien et al. 2013)"
+      }
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_lemonniera",
+      "end_node_id": "class_leotiomycetes",
+      "properties": {
+        "evidence": "Não monofilético dentro de Helotiales"
+      }
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_flagellospora",
+      "end_node_id": "class_leotiomycetes"
+    },
+    {
+      "type": "POLYPHYLETIC_IN",
+      "start_node_id": "genus_varicosporium",
+      "end_node_id": "class_leotiomycetes"
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_condylospora",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_dendrosporomyces",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_flabellospora",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_ingoldiella",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_jaculispora",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_naiadella",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_pyramidospora",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_scutisporus",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_trinacrium",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_trisulcosporium",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_flabelloscladia",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_dendrosporium",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_diplocladiella",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_brachiosphaera",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_volucrispora",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "BELONGS_TO_ORDER",
+      "start_node_id": "genus_actinospora",
+      "end_node_id": "order_helotiales",
+      "properties": {
+        "placement_status": "incertae_sedis",
+        "note": "Alocação tentativa baseada em afinidade morfológica; posição filogenética não confirmada molecularmente"
+      }
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_condylospora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_dendrosporomyces",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_dwayaangam",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_filosporella",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_jaculispora",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_margaritispora",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_scutisporus",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_trisulcosporium",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_dendrosporium",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_aquanectria",
+      "end_node_id": "morphotype_scolecoid"
+    },
+    {
+      "type": "HAS_MORPHOTYPE",
+      "start_node_id": "genus_diplocladiella",
+      "end_node_id": "morphotype_stauroid"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_anguillospora_crassa",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_clavariopsis_aquatica",
+      "end_node_id": "region_temperate"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tetrachaetum_elegans",
+      "end_node_id": "region_temperate"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tricladium_splendens",
+      "end_node_id": "region_brazil_atlantic_forest"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_tricladium_splendens",
+      "end_node_id": "region_temperate"
+    },
+    {
+      "type": "OCCURS_IN",
+      "start_node_id": "species_varicosporium_elodeae",
+      "end_node_id": "region_temperate"
+    },
+    {
+      "type": "INCLUDES_AQUATIC_IN",
+      "start_node_id": "phylum_basidiomycota",
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "note": "Poucos representantes basidiomicetos em Corticiaceae e Urediniomycetes"
+      }
+    },
+    {
+      "type": "EXTENDS_TO",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "habitat_estuarine"
+    },
+    {
+      "type": "EXTENDS_TO",
+      "start_node_id": "eco_group_submerged_aquatic",
+      "end_node_id": "habitat_marine"
+    },
+    {
+      "type": "CHARACTERISTIC_OF",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "region_tropical"
+    },
+    {
+      "type": "USES_CONIDIOGENESIS",
+      "start_node_id": "genus_anguillospora",
+      "end_node_id": "conidiogenesis_annellidic"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_color"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_color"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_stauroid",
+      "end_node_id": "morph_attr_surface_texture"
+    },
+    {
+      "type": "MEASURED_BY",
+      "start_node_id": "morphotype_scolecoid",
+      "end_node_id": "morph_attr_surface_texture"
+    }
+  ],
+  "cypher_import_script": {
+    "description": "Script Cypher para importação direta no Neo4j. Execute sequencialmente.",
+    "commands": [
+      "// 1. Criar constraints para performance",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Phylum) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Class) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Order) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Genus) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Species) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:ConidialMorphotype) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:MorphologicalAttribute) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:EcologicalGroup) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Habitat) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Substrate) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:GeographicRegion) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Conidiogenesis) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:EnzymaticActivity) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:CVArchitecture) REQUIRE n.id IS UNIQUE;",
+      "CREATE CONSTRAINT IF NOT EXISTS FOR (n:CVPipeline) REQUIRE n.id IS UNIQUE;",
+      "",
+      "// 2. Importar nós via APOC (ajustar path do JSON)",
+      "CALL apoc.load.json('file:///aquatic_hyphomycetes_neo4j.json') YIELD value",
+      "UNWIND value.nodes AS node",
+      "CALL apoc.create.node([node.label], apoc.map.merge({id: node.id}, node.properties)) YIELD node AS n",
+      "RETURN count(n);",
+      "",
+      "// 3. Importar relacionamentos via APOC",
+      "CALL apoc.load.json('file:///aquatic_hyphomycetes_neo4j.json') YIELD value",
+      "UNWIND value.relationships AS rel",
+      "MATCH (a {id: rel.start_node_id}), (b {id: rel.end_node_id})",
+      "CALL apoc.create.relationship(a, rel.type, COALESCE(rel.properties, {}), b) YIELD rel AS r",
+      "RETURN count(r);"
+    ]
+  },
+  "graph_statistics": {
+    "total_node_types": 15,
+    "total_nodes": 101,
+    "total_relationship_types": 16,
+    "total_relationships": 216,
+    "node_type_counts": {
+      "Phylum": 2,
+      "Class": 6,
+      "Order": 5,
+      "Genus": 38,
+      "Species": 15,
+      "ConidialMorphotype": 5,
+      "MorphologicalAttribute": 12,
+      "Conidiogenesis": 4,
+      "EcologicalGroup": 4,
+      "Habitat": 4,
+      "Substrate": 4,
+      "GeographicRegion": 6,
+      "EnzymaticActivity": 5,
+      "CVArchitecture": 2,
+      "CVPipeline": 1
+    }
+  },
+  "cv_integration_methodology": {
+    "description": "Metodologia técnica para integração do grafo com modelos multimodais de visão computacional",
+    "pipeline_stages": [
+      {
+        "stage": 1,
+        "name": "Pré-processamento de Imagens",
+        "description": "Pipeline v3 (percentil) para segmentação de espécimes individuais a partir de TIFF de microscopia",
+        "tools": "Python + OpenCV + PyTorch"
+      },
+      {
+        "stage": 2,
+        "name": "Extração de Features Morfológicas",
+        "description": "Extração automática dos atributos morfológicos definidos nos nós MorphologicalAttribute do grafo: septação, ramificação, curvatura, dimensões",
+        "tools": "Esqueletização + análise de contorno + calibração de barra de escala"
+      },
+      {
+        "stage": 3,
+        "name": "Classificação Few-Shot (Siamese ViT)",
+        "description": "Treinamento da rede Siamesa ViT-Small com pares de imagens. O grafo fornece relações de similaridade entre táxons para construção de pares positivos/negativos inteligentes.",
+        "tools": "PyTorch + ViT-Small backbone"
+      },
+      {
+        "stage": 4,
+        "name": "Validação via Grafo Neo4j",
+        "description": "Predições do modelo são validadas contra o grafo: uma predição de Tetracladium deve ser consistente com morfotipo estauróide, Helotiales, Leotiomycetes.",
+        "tools": "Neo4j + Cypher queries"
+      },
+      {
+        "stage": 5,
+        "name": "Descrição Multimodal (VLM)",
+        "description": "LLaVA-Med/BiomedGPT gera descrição textual taxonômica da imagem, que é comparada com as propriedades dos nós no grafo via LangChain.",
+        "tools": "LangChain + Neo4j + LLaVA-Med/BiomedGPT"
+      }
+    ],
+    "data_bias_considerations": [
+      {
+        "bias_type": "Desbalanceamento de Classes",
+        "description": "Espécies cosmopolitas (L. curvula, A. tetracladia) terão muito mais imagens que espécies raras ou tropicais.",
+        "mitigation": "Few-shot learning (Siamese Networks), data augmentation, class-balanced sampling"
+      },
+      {
+        "bias_type": "Viés Geográfico",
+        "description": "Dados morfológicos predominantemente de regiões temperadas europeias. Variação intra-específica tropical pode ser subestimada.",
+        "mitigation": "Priorizar dataset próprio (4600+ imagens do Brasil) + ITS barcoding para validação"
+      },
+      {
+        "bias_type": "Convergência Morfológica",
+        "description": "Formas tetrarradiadas e sigmoidais são convergentes evolutivamente - gêneros filogeneticamente distantes podem ser morfologicamente similares.",
+        "mitigation": "Integrar features além da forma: septação, textura, dimensões, tipo de conidiogênese"
+      },
+      {
+        "bias_type": "Viés de Preparação de Lâmina",
+        "description": "Artefatos de coloração, compressão e iluminação variam entre laboratórios e protocolos.",
+        "mitigation": "Normalização de estain, augmentation de iluminação/contraste, treinamento com variação de protocolo"
+      }
+    ],
+    "critical_implementation_questions": [
+      "Como lidar com espécimes danificados ou parcialmente visíveis nas imagens de microscopia, onde braços de conídios estauróides podem estar quebrados?",
+      "Qual a granularidade mínima de classificação viável: gênero, espécie, ou morfotipo? A polifilia de gêneros como Anguillospora e Tricladium compromete a classificação taxonômica por morfologia?",
+      "Como o modelo Siamese lidará com a transição entre estágios de desenvolvimento conidial (conídios imaturos vs. maduros)?",
+      "A integração LangChain-Neo4j pode escalar para consultas em tempo real durante inferência, ou o grafo deve ser compactado em embeddings offline?",
+      "Como validar se as features aprendidas pela rede neural correspondem aos caracteres taxonômicos reais usados por micologistas, evitando shortcuts espúrios?"
+    ]
+  }
+}
