@@ -13,6 +13,10 @@ Pillow>=10.0.0
 scikit-image>=0.21.0
 tifffile>=2023.7.0
 
+# PDF Extraction & OCR
+PyMuPDF>=1.23.0
+pytesseract>=0.3.10
+
 # Neo4j / Knowledge Graph
 neo4j>=5.14.0
 py2neo>=2021.2.3
