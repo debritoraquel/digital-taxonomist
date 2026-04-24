@@ -12,7 +12,8 @@ from pathlib import Path
 from typing import Optional
 
 import click
-from neo4j import GraphDatabase
+
+from src.graph.connection import get_driver
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -21,9 +22,9 @@ logger = logging.getLogger(__name__)
 class GraphLoader:
     """Loads the aquatic hyphomycetes knowledge graph into Neo4j."""
 
-    def __init__(self, uri: str = "bolt://localhost:7687", user: str = "neo4j", password: str = "password"):
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
-        logger.info(f"Connected to Neo4j at {uri}")
+    def __init__(self, uri: Optional[str] = None, user: Optional[str] = None, password: Optional[str] = None):
+        self.driver = get_driver(uri, user, password)
+        logger.info("Connected to Neo4j")
 
     def close(self):
         self.driver.close()
@@ -155,9 +156,9 @@ class GraphLoader:
 
 @click.command()
 @click.option("--json", "json_path", required=True, help="Path to the graph JSON file")
-@click.option("--uri", default="bolt://localhost:7687", help="Neo4j URI")
-@click.option("--user", default="neo4j", help="Neo4j username")
-@click.option("--password", default="password", help="Neo4j password")
+@click.option("--uri", default=None, help="Neo4j URI (default: NEO4J_URI env var or bolt://localhost:7687)")
+@click.option("--user", default=None, help="Neo4j username (default: NEO4J_USER env var or neo4j)")
+@click.option("--password", default=None, help="Neo4j password (default: NEO4J_PASSWORD env var)")
 @click.option("--no-clear", is_flag=True, help="Don't clear database before import")
 @click.option("--verify", is_flag=True, help="Run verification after import")
 def main(json_path: str, uri: str, user: str, password: str, no_clear: bool, verify: bool):

@@ -8,7 +8,7 @@ and graph-guided classification support.
 from dataclasses import dataclass
 from typing import Optional
 
-from neo4j import GraphDatabase
+from src.graph.connection import get_driver
 
 
 @dataclass
@@ -25,8 +25,8 @@ class TaxonomicPath:
 class QueryEngine:
     """Pre-built Cypher queries for the knowledge graph."""
 
-    def __init__(self, uri: str, user: str, password: str):
-        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+    def __init__(self, uri: Optional[str] = None, user: Optional[str] = None, password: Optional[str] = None):
+        self.driver = get_driver(uri, user, password)
 
     def close(self):
         self.driver.close()
