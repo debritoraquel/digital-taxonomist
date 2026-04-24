@@ -5,8 +5,8 @@ services:
     image: neo4j:5-community
     container_name: digital-taxonomist-neo4j
     ports:
-      - "7474:7474"   # Browser
-      - "7687:7687"   # Bolt
+      - "7475:7474"   # Browser  (acesse em http://localhost:7475)
+      - "7687:7687"   # Bolt     (conexão programática)
     environment:
       NEO4J_AUTH: neo4j/taxonomist2026
       NEO4J_PLUGINS: '["apoc"]'

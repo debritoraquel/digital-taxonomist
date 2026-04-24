@@ -95,7 +95,7 @@ docker compose logs neo4j | tail -5
 ```
 
 O Neo4j estará disponível em:
-- **Browser**: http://localhost:7474
+- **Browser**: http://localhost:7475
 - **Bolt**: bolt://localhost:7687
 - **Credenciais**: `neo4j` / `taxonomist2026`
 
@@ -119,7 +119,7 @@ python src/graph/load_graph.py \
 
 ### Passo 7 — Verificar no Neo4j Browser
 
-Acesse http://localhost:7474 e execute:
+Acesse http://localhost:7475 e execute:
 
 ```cypher
 // Ver todo o grafo (cuidado: muitos nós)
@@ -252,7 +252,7 @@ python src/graph/load_graph.py \
 | Problema | Solução |
 |----------|---------|
 | `git push` pede senha | Use `gh auth login` ou configure SSH: `ssh-keygen -t ed25519` → adicionar em GitHub Settings → SSH Keys |
-| Neo4j não inicia | `docker compose logs neo4j` para ver erro. Comum: porta 7474/7687 já em uso |
+| Neo4j não inicia | `docker compose logs neo4j` para ver erro. Comum: porta 7475/7687 já em uso |
 | APOC não disponível | Verificar `NEO4J_PLUGINS: '["apoc"]'` no docker-compose.yml |
 | `ModuleNotFoundError: neo4j` | `pip install neo4j` |
 | JSON muito grande para APOC | Use `load_graph.py` que faz batch por nó/aresta |

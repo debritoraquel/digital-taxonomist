@@ -181,7 +181,7 @@ print('Neo4j OK:', check_connectivity())
 
 ## 5. Scripts Cypher — Investigando o Grafo
 
-Abra o Neo4j Browser em `http://localhost:7474` (ou use `cypher-shell`) e execute as
+Abra o Neo4j Browser em `http://localhost:7475` (ou use `cypher-shell`) e execute as
 consultas abaixo.
 
 ---

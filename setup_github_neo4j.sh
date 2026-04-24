@@ -87,7 +87,7 @@ if command -v docker &> /dev/null; then
 
     # Verificar se está rodando
     if docker compose ps | grep -q "running"; then
-        echo "   ✓ Neo4j rodando em http://localhost:7474"
+        echo "   ✓ Neo4j rodando em http://localhost:7475"
         echo "   ✓ Bolt em bolt://localhost:7687"
         echo "   ✓ Credenciais: neo4j / taxonomist2026"
     else
@@ -143,10 +143,10 @@ echo " ✓ SETUP COMPLETO!"
 echo "============================================"
 echo ""
 echo " GitHub:  https://github.com/SEU_USUARIO/digital-taxonomist"
-echo " Neo4j:   http://localhost:7474  (neo4j/taxonomist2026)"
+echo " Neo4j:   http://localhost:7475  (neo4j/taxonomist2026)"
 echo ""
 echo " Próximos passos:"
-echo "   1. Abrir Neo4j Browser: http://localhost:7474"
+echo "   1. Abrir Neo4j Browser: http://localhost:7475"
 echo "   2. Executar: MATCH (n) RETURN n LIMIT 50"
 echo "   3. Explorar o grafo visualmente"
 echo ""
