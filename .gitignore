@@ -9,3 +9,15 @@ build/
 .mypy_cache/
 .ruff_cache/
 .env
+
+# Neo4j exports — snapshots datados ficam no diretório abaixo (não versionados por padrão)
+# Para versionar um snapshot específico: git add -f data/neo4j/snapshots/graph_YYYYMMDD.json
+data/neo4j/snapshots/*
+!data/neo4j/snapshots/.gitkeep
+
+# CSVs gerados pelo export (grandes, regeneráveis)
+data/neo4j/csv/
+
+# Exports comprimidos
+data/neo4j/*.json.gz
+data/neo4j/snapshots/*.json.gz
