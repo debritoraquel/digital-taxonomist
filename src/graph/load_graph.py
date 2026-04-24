@@ -13,7 +13,7 @@ from typing import Optional
 
 import click
 
-from src.graph.connection import get_driver
+from graph.connection import get_driver
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)

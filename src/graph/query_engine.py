@@ -8,7 +8,7 @@ and graph-guided classification support.
 from dataclasses import dataclass
 from typing import Optional
 
-from src.graph.connection import get_driver
+from graph.connection import get_driver
 
 
 @dataclass
