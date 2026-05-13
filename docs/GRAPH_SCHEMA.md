@@ -1,32 +1,37 @@
 # Graph Schema & Methodology
 
-## Ontological Model
+## Ontological Model (v1.2 — com pesos ecológicos)
 
 The knowledge graph encodes the complete taxonomic, morphological, and ecological
 knowledge about aquatic hyphomycetes (Ingoldian fungi) needed for computer vision
-classification.
+classification and biomonitoring decision support.
 
-### Node Types (15 labels, 116 nodes)
+**v1.2 additions:** ecological weights on all relationships, `BiomonitoringIndex`
+node type, `INDICATES_WATER_QUALITY` relationships, and Bayesian decision priors
+on `EcologicalGroup` nodes.
+
+### Node Types (16 labels, 119 nodes)
 
 | Label | Count | Role in Pipeline |
 |-------|-------|-----------------|
 | **Phylum** | 2 | Root of taxonomic hierarchy |
 | **Class** | 6 | Molecular phylogenetic placement |
 | **Order** | 5 | Dominant: Helotiales (37 connections) |
-| **Genus** | 38 | Primary classification target for CV |
+| **Genus** | 41 | Primary classification target for CV |
 | **Species** | 15 | Key species with Brazilian distribution |
 | **ConidialMorphotype** | 5 | Core visual categories for CV |
 | **MorphologicalAttribute** | 12 | Measurable features extracted by CV |
 | **Conidiogenesis** | 4 | Spore formation mode |
-| **EcologicalGroup** | 4 | Ecological classification |
+| **EcologicalGroup** | 4 | Ecological classification + Bayesian priors |
 | **Habitat** | 4 | Physical environment types |
 | **Substrate** | 4 | Growth substrates |
 | **GeographicRegion** | 6 | Distribution data (4 Brazilian biomes) |
 | **EnzymaticActivity** | 5 | Functional ecology |
+| **BiomonitoringIndex** | 3 | Water quality indices (IQRH, Shannon, TEI) |
 | **CVArchitecture** | 2 | ML model components |
 | **CVPipeline** | 1 | Preprocessing pipeline |
 
-### Relationship Types (21 types, 216 edges)
+### Relationship Types (23 types, 222 edges — com pesos)
 
 **Taxonomic hierarchy:**
 - `BELONGS_TO_PHYLUM` — Class → Phylum
@@ -39,16 +44,19 @@ classification.
 - `MEASURED_BY` — ConidialMorphotype → MorphologicalAttribute
 - `USES_CONIDIOGENESIS` — Genus → Conidiogenesis
 
-**Ecological:**
-- `CLASSIFIED_AS` — Genus → EcologicalGroup
-- `INHABITS` — EcologicalGroup → Habitat
-- `FOUND_ON` — EcologicalGroup → Substrate
+**Ecological (com pesos para inferência):**
+- `CLASSIFIED_AS` — Genus → EcologicalGroup · props: `affinity_weight` [0-1], `decision_weight`
+- `INHABITS` — EcologicalGroup → Habitat · props: `frequency_weight` [0-1], `seasonality`
+- `FOUND_ON` — EcologicalGroup → Substrate · props: `preference_score` [0-1], `decomposition_stage_preference`
 - `EXTENDS_TO` — EcologicalGroup → Habitat (rare/marginal)
-- `PRODUCES_ENZYME` — EcologicalGroup → EnzymaticActivity
+- `PRODUCES_ENZYME` — EcologicalGroup → EnzymaticActivity · props: `activity_level`, `activity_score` [0-1]
 
 **Biogeographic:**
-- `OCCURS_IN` — Species → GeographicRegion
+- `OCCURS_IN` — Species → GeographicRegion · props: `occurrence_probability` [0-1], `collection_records`
 - `CHARACTERISTIC_OF` — EcologicalGroup → GeographicRegion
+
+**Biomonitoring (novos em v1.2):**
+- `INDICATES_WATER_QUALITY` — EcologicalGroup → BiomonitoringIndex · props: `indicator_weight` [0-1], `direction`
 
 **Phylogenetic:**
 - `POLYPHYLETIC_IN` — Genus → Class (for polyphyletic genera)
@@ -58,6 +66,42 @@ classification.
 - `TARGETS_CLASSIFICATION_OF` — CVArchitecture → ConidialMorphotype
 - `INTEGRATES_WITH` — CVArchitecture → CVArchitecture
 - `FEEDS_INTO` — CVPipeline → CVArchitecture
+
+## Ecological Weight Schema
+
+Weights enable probabilistic inference at every step of the identification pipeline:
+
+| Relationship | Weight Property | Inference Use |
+|---|---|---|
+| `CLASSIFIED_AS` | `affinity_weight` | P(eco_group \| genus) — prior ecológico |
+| `INHABITS` | `frequency_weight` | P(habitat \| eco_group) — verossimilhança de habitat |
+| `FOUND_ON` | `preference_score` | P(substrate \| eco_group) — verossimilhança de substrato |
+| `PRODUCES_ENZYME` | `activity_score` | P(enzyme \| eco_group) — capacidade funcional |
+| `OCCURS_IN` | `occurrence_probability` | P(region \| species) — prior geográfico |
+| `INDICATES_WATER_QUALITY` | `indicator_weight` | contribuição ao índice de qualidade |
+
+### EcologicalGroup Decision Priors
+
+Each `EcologicalGroup` carries a `decision_prior` — the prior probability that a
+randomly collected aquatic hyphomycete from a subtropical Brazilian stream belongs
+to this group:
+
+| Group | Prior | Rationale |
+|---|---|---|
+| Ingoldian | 0.60 | Dominant group in lotic environments |
+| Aero-aquatic | 0.20 | Common in lentic/mixed habitats |
+| Submerged-aquatic | 0.10 | Specialist on woody debris |
+| Terrestrial-aquatic | 0.10 | Rare in pure aquatic samples |
+
+### BiomonitoringIndex Nodes
+
+Three indices are encoded for water quality decision support:
+
+| ID | Name | Scale | decision_weight |
+|---|---|---|---|
+| `idx_iqrh` | IQRH — Índice de Qualidade por Hifomicetos | 0-10 | 0.90 |
+| `idx_shannon_hifi` | H' Shannon-Wiener (Hifomicetos) | 0-4 bits | 0.75 |
+| `idx_sporulation` | Taxa de Esporulação Ingoldiana (TEI) | esporos/L/dia | 0.65 |
 
 ## Key Design Decisions
 

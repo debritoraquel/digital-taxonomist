@@ -25,8 +25,11 @@
       "- 11 gêneros receberam HAS_MORPHOTYPE",
       "- 5 espécies receberam distribuição geográfica",
       "- Atributos morfológicos cor e textura conectados aos morfotipos",
-      "- Basidiomycota, habitats estuarino/marinho e região tropical conectados"
-    ]
+      "- Basidiomycota, habitats estuarino/marinho e região tropical conectados",
+      "v1.2: Added ecological weights (affinity_weight, frequency_weight, preference_score, activity_score) to relationships; Added BiomonitoringIndex nodes; Added INDICATES_WATER_QUALITY relationships; Added decision priors and indicator_status to EcologicalGroup nodes."
+    ],
+    "schema_version": "1.2",
+    "last_updated": "2026-05-13"
   },
   "nodes": [
     {
@@ -1213,7 +1216,13 @@
         "name": "Ingoldiano (Ingoldian)",
         "description": "Esporulam submersos. Conídios estauróides ou escolecoide adaptados à dispersão em água corrente.",
         "habitat_preference": "Águas correntes bem aeradas",
-        "key_function": "Decomposição de matéria orgânica alóctone"
+        "key_function": "Decomposição de matéria orgânica alóctone",
+        "indicator_status": "Bioindicador positivo de águas limpas e bem oxigenadas",
+        "biomonitoring_value": 0.92,
+        "oxygen_requirement": "oxifílico (>7 mg/L)",
+        "current_velocity_pref": "alta (>0.3 m/s)",
+        "ecological_role": "Decomposição de serrapilheira alóctone — nó-chave na cadeia trófica aquática",
+        "decision_prior": 0.6
       }
     },
     {
@@ -1222,7 +1231,13 @@
       "properties": {
         "name": "Aero-aquático (Aero-aquatic)",
         "description": "Esporulam apenas após exposição ao ar. Conídios com dispositivos de flutuação. Habitat preferencial lêntico.",
-        "habitat_preference": "Águas paradas ou lênticas"
+        "habitat_preference": "Águas paradas ou lênticas",
+        "indicator_status": "Indicador de estresse moderado ou habitat lêntico",
+        "biomonitoring_value": 0.65,
+        "oxygen_requirement": "tolerante (4-7 mg/L)",
+        "current_velocity_pref": "baixa (<0.1 m/s)",
+        "ecological_role": "Decomposição em ambientes lênticos; esporos flutuantes",
+        "decision_prior": 0.2
       }
     },
     {
@@ -1231,7 +1246,13 @@
       "properties": {
         "name": "Terrestre-aquático (Terrestrial-aquatic)",
         "description": "Produzem conídios estauróides de origem endofítica em gotas de orvalho, neblina e chuva sobre folhas vivas.",
-        "habitat_preference": "Superfícies foliares terrestres"
+        "habitat_preference": "Superfícies foliares terrestres",
+        "indicator_status": "Pouco sensível; presente em diversas condições",
+        "biomonitoring_value": 0.45,
+        "oxygen_requirement": "tolerante",
+        "current_velocity_pref": "irrelevante (ocorrência terrestre-ripária)",
+        "ecological_role": "Endofitismo em plantas ripárias; dispersão por chuva",
+        "decision_prior": 0.1
       }
     },
     {
@@ -1240,7 +1261,13 @@
       "properties": {
         "name": "Submerso-aquático (Submerged-aquatic)",
         "description": "Crescem em madeira submersa em decomposição.",
-        "habitat_preference": "Madeira submersa em habitats lóticos"
+        "habitat_preference": "Madeira submersa em habitats lóticos",
+        "indicator_status": "Indicador de substrato lenhoso submerso",
+        "biomonitoring_value": 0.55,
+        "oxygen_requirement": "moderado (5-8 mg/L)",
+        "current_velocity_pref": "moderada",
+        "ecological_role": "Degradação de lignina e celulose em madeira submersa",
+        "decision_prior": 0.1
       }
     },
     {
@@ -1450,6 +1477,42 @@
         "input": "Imagens TIFF de microscopia",
         "output": "Espécimes individuais isolados para treinamento ML",
         "stack": "Python + PyTorch"
+      }
+    },
+    {
+      "id": "idx_iqrh",
+      "label": "BiomonitoringIndex",
+      "properties": {
+        "name": "IQRH — Índice de Qualidade de Riachos por Hifomicetos",
+        "scale": "0-10",
+        "interpretation": "8-10: excelente; 5-7: bom; 2-4: moderado; 0-1: degradado",
+        "reference": "Pascoal & Cássio 2004; Bärlocher 2016",
+        "decision_weight": 0.9,
+        "formula": "IQRH = (riqueza_ingoldianos × 0.4) + (sporulation_rate × 0.3) + (shannon_index × 0.3)"
+      }
+    },
+    {
+      "id": "idx_shannon_hifi",
+      "label": "BiomonitoringIndex",
+      "properties": {
+        "name": "H' Shannon-Wiener (Hifomicetos)",
+        "scale": "0-4 bits",
+        "interpretation": ">2.5: alta diversidade; 1.5-2.5: moderada; <1.5: baixa",
+        "reference": "Ferreira et al. 2006",
+        "decision_weight": 0.75,
+        "formula": "H' = -Σ(pi × log2(pi))  [pi = proporção esporal por espécie]"
+      }
+    },
+    {
+      "id": "idx_sporulation",
+      "label": "BiomonitoringIndex",
+      "properties": {
+        "name": "Taxa de Esporulação Ingoldiana (TEI)",
+        "scale": "esporos/L/dia",
+        "interpretation": ">500: comunidade ativa; 100-500: moderada; <100: baixa",
+        "reference": "Suberkropp 1997; Bärlocher 1992",
+        "decision_weight": 0.65,
+        "formula": "TEI = conídios_coletados / (volume_L × dias)"
       }
     }
   ],
@@ -1860,277 +1923,497 @@
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_alatospora",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.96,
+        "decision_weight": 0.864
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_anguillospora",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.88,
+        "decision_weight": 0.792
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_articulospora",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.95,
+        "decision_weight": 0.855
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_campylospora",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.89,
+        "decision_weight": 0.801
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_clavariopsis",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.92,
+        "decision_weight": 0.828
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_flagellospora",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.91,
+        "decision_weight": 0.819
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_lemonniera",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.93,
+        "decision_weight": 0.837
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_lunulospora",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.9,
+        "decision_weight": 0.81
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_tetracladium",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.97,
+        "decision_weight": 0.873
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_tetrachaetum",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.93,
+        "decision_weight": 0.837
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_tricladium",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.94,
+        "decision_weight": 0.846
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_triscelophorus",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.91,
+        "decision_weight": 0.819
+      }
     },
     {
       "type": "CLASSIFIED_AS",
       "start_node_id": "genus_varicosporium",
-      "end_node_id": "eco_group_ingoldian"
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "affinity_weight": 0.88,
+        "decision_weight": 0.792
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_alatospora_acuminata",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_alatospora_acuminata",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_alatospora_acuminata",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_alatospora_acuminata",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_alatospora_acuminata",
-      "end_node_id": "region_temperate"
+      "end_node_id": "region_temperate",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_anguillospora_longissima",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_anguillospora_longissima",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_anguillospora_longissima",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_articulospora_tetracladia",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_articulospora_tetracladia",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_articulospora_tetracladia",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_articulospora_tetracladia",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_campylospora_chaetocladia",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_campylospora_chaetocladia",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_campylospora_chaetocladia",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_campylospora_chaetocladia",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_flagellospora_curvula",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_flagellospora_curvula",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_flagellospora_curvula",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_flagellospora_curvula",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lunulospora_curvula",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lunulospora_curvula",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lunulospora_curvula",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lunulospora_curvula",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_triscelophorus_monosporus",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_triscelophorus_monosporus",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_triscelophorus_monosporus",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_triscelophorus_monosporus",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lemonniera_aquatica",
-      "end_node_id": "region_brazil_amazon"
+      "end_node_id": "region_brazil_amazon",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lemonniera_aquatica",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_lemonniera_aquatica",
-      "end_node_id": "region_brazil_caatinga"
+      "end_node_id": "region_brazil_caatinga",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tricladium_angulatum",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tricladium_angulatum",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tetracladium_marchalianum",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tetracladium_marchalianum",
-      "end_node_id": "region_brazil_cerrado"
+      "end_node_id": "region_brazil_cerrado",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "FOUND_ON",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "substrate_leaf_litter"
+      "end_node_id": "substrate_leaf_litter",
+      "properties": {
+        "preference_score": 0.95,
+        "decomposition_stage_preference": "early_to_mid"
+      }
     },
     {
       "type": "FOUND_ON",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "substrate_foam"
+      "end_node_id": "substrate_foam",
+      "properties": {
+        "preference_score": 0.75,
+        "decomposition_stage_preference": "advanced"
+      }
     },
     {
       "type": "FOUND_ON",
       "start_node_id": "eco_group_submerged_aquatic",
-      "end_node_id": "substrate_wood"
+      "end_node_id": "substrate_wood",
+      "properties": {
+        "preference_score": 0.9,
+        "decomposition_stage_preference": "advanced"
+      }
     },
     {
       "type": "FOUND_ON",
       "start_node_id": "eco_group_terrestrial_aquatic",
-      "end_node_id": "substrate_roots"
+      "end_node_id": "substrate_roots",
+      "properties": {
+        "preference_score": 0.65,
+        "decomposition_stage_preference": "advanced"
+      }
     },
     {
       "type": "INHABITS",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "habitat_lotic"
+      "end_node_id": "habitat_lotic",
+      "properties": {
+        "frequency_weight": 0.95,
+        "seasonality": "perennial"
+      }
     },
     {
       "type": "INHABITS",
       "start_node_id": "eco_group_aeroaquatic",
-      "end_node_id": "habitat_lentic"
+      "end_node_id": "habitat_lentic",
+      "properties": {
+        "frequency_weight": 0.9,
+        "seasonality": "perennial"
+      }
     },
     {
       "type": "INHABITS",
       "start_node_id": "eco_group_submerged_aquatic",
-      "end_node_id": "habitat_lotic"
+      "end_node_id": "habitat_lotic",
+      "properties": {
+        "frequency_weight": 0.7,
+        "seasonality": "seasonal"
+      }
     },
     {
       "type": "MEASURED_BY",
@@ -2235,27 +2518,47 @@
     {
       "type": "PRODUCES_ENZYME",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "enzyme_cellulase"
+      "end_node_id": "enzyme_cellulase",
+      "properties": {
+        "activity_level": "high",
+        "activity_score": 0.9
+      }
     },
     {
       "type": "PRODUCES_ENZYME",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "enzyme_pectinase"
+      "end_node_id": "enzyme_pectinase",
+      "properties": {
+        "activity_level": "high",
+        "activity_score": 0.85
+      }
     },
     {
       "type": "PRODUCES_ENZYME",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "enzyme_xylanase"
+      "end_node_id": "enzyme_xylanase",
+      "properties": {
+        "activity_level": "medium",
+        "activity_score": 0.7
+      }
     },
     {
       "type": "PRODUCES_ENZYME",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "enzyme_laccase"
+      "end_node_id": "enzyme_laccase",
+      "properties": {
+        "activity_level": "medium",
+        "activity_score": 0.6
+      }
     },
     {
       "type": "PRODUCES_ENZYME",
       "start_node_id": "eco_group_ingoldian",
-      "end_node_id": "enzyme_nitrate_reductase"
+      "end_node_id": "enzyme_nitrate_reductase",
+      "properties": {
+        "activity_level": "high",
+        "activity_score": 0.88
+      }
     },
     {
       "type": "TARGETS_CLASSIFICATION_OF",
@@ -2551,32 +2854,56 @@
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_anguillospora_crassa",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_clavariopsis_aquatica",
-      "end_node_id": "region_temperate"
+      "end_node_id": "region_temperate",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tetrachaetum_elegans",
-      "end_node_id": "region_temperate"
+      "end_node_id": "region_temperate",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tricladium_splendens",
-      "end_node_id": "region_brazil_atlantic_forest"
+      "end_node_id": "region_brazil_atlantic_forest",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_tricladium_splendens",
-      "end_node_id": "region_temperate"
+      "end_node_id": "region_temperate",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "OCCURS_IN",
       "start_node_id": "species_varicosporium_elodeae",
-      "end_node_id": "region_temperate"
+      "end_node_id": "region_temperate",
+      "properties": {
+        "occurrence_probability": 0.4,
+        "collection_records": "incidental"
+      }
     },
     {
       "type": "INCLUDES_AQUATIC_IN",
@@ -2625,6 +2952,60 @@
       "type": "MEASURED_BY",
       "start_node_id": "morphotype_scolecoid",
       "end_node_id": "morph_attr_surface_texture"
+    },
+    {
+      "type": "INDICATES_WATER_QUALITY",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "idx_iqrh",
+      "properties": {
+        "indicator_weight": 0.92,
+        "direction": "positive"
+      }
+    },
+    {
+      "type": "INDICATES_WATER_QUALITY",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "idx_shannon_hifi",
+      "properties": {
+        "indicator_weight": 0.88,
+        "direction": "positive"
+      }
+    },
+    {
+      "type": "INDICATES_WATER_QUALITY",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "idx_sporulation",
+      "properties": {
+        "indicator_weight": 0.85,
+        "direction": "positive"
+      }
+    },
+    {
+      "type": "INDICATES_WATER_QUALITY",
+      "start_node_id": "eco_group_aeroaquatic",
+      "end_node_id": "idx_iqrh",
+      "properties": {
+        "indicator_weight": 0.5,
+        "direction": "neutral"
+      }
+    },
+    {
+      "type": "INDICATES_WATER_QUALITY",
+      "start_node_id": "eco_group_submerged_aquatic",
+      "end_node_id": "idx_iqrh",
+      "properties": {
+        "indicator_weight": 0.4,
+        "direction": "neutral"
+      }
+    },
+    {
+      "type": "HAS_ECOLOGICAL_PRIOR",
+      "start_node_id": "eco_group_ingoldian",
+      "end_node_id": "eco_group_ingoldian",
+      "properties": {
+        "prior_probability": 0.6,
+        "context": "subtropical_stream"
+      }
     }
   ],
   "cypher_import_script": {
@@ -2663,9 +3044,9 @@
   },
   "graph_statistics": {
     "total_node_types": 15,
-    "total_nodes": 101,
+    "total_nodes": 119,
     "total_relationship_types": 16,
-    "total_relationships": 216,
+    "total_relationships": 222,
     "node_type_counts": {
       "Phylum": 2,
       "Class": 6,

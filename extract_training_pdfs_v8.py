@@ -417,6 +417,9 @@ _STRATEGY_CONFIDENCE = {
     "legend_strict":       0.95,   # "15. Tripospermum camelopardus"
     "legend_loose":        0.85,   # "15, Genus epithet"
     "caption_pairs":       0.80,   # "Figures 11-27. ... 11, Gyoerffyella ..."
+    "dpsf_key_strict":     0.90,   # "1a. Tetracladium marchalianum -- chave"
+    "dpsf_key_abbreviated":0.72,   # "2b. T. marchalianum" (genus expandido)
+    "species_list":        0.88,   # "Species: A x, B y, C z"
     "abbreviated":         0.70,   # "12. G. biappendiculata"
     "adjacent_pages":      0.65,   # mesma estrategia, mas em paginas vizinhas
     "proximity_binomial":  0.55,   # binomio completo proximo do bbox
@@ -1034,6 +1037,24 @@ def process_pdf(pdf: Path, out_draw: Path, out_micro: Path, out_amb: Path,
                 adjacent.append(all_pages_text[pno + 1])
 
             legend_map = parse_legend_multi(full_text, vocab, adjacent)
+
+            # DPSF strategy: enrich legend_map com entradas de chave dicotomica
+            if len(legend_map) < 2:
+                try:
+                    from genus_species_extractor import EpithetExtractor
+                    _dpsf_ext = EpithetExtractor(list(vocab._genera) if hasattr(vocab, '_genera') else [])
+                    for hit in _dpsf_ext.extract_from_key_entries(full_text):
+                        num = hit.key_entry_number or 0
+                        if num > 0 and num not in legend_map:
+                            legend_map[num] = LegendHit(
+                                number=num,
+                                binomial=hit.binomial,
+                                strategy=hit.rule.replace("dpsf-key-", "dpsf_key_"),
+                                confidence=hit.confidence,
+                            )
+                except Exception:
+                    pass
+
             page_fb = resolve_page_fallback(full_text, vocab)
 
             imagens = iter_page_images(doc, pno, CFG["min_img_px"])
